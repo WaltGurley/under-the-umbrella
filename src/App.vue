@@ -282,6 +282,14 @@ export default {
       })
 
       this.zooming = zooming
+    },
+    resizeApp: function() {
+      const minDimension = Math.min(window.innerWidth / 1920,
+        window.innerHeight / 1080)
+      if (minDimension < 1) {
+        this.testScale = `translate(-50%, -50%) scale(${minDimension})`
+      }
+    console.log(this.testScale)
     }
   },
   beforeMount () {
@@ -292,7 +300,6 @@ export default {
 
     const minDimension = Math.min(window.innerWidth / 1920,
       window.innerHeight / 1080)
-    console.log(minDimension)
     if (minDimension < 1) {
       this.testScale = `translate(-50%, -50%) scale(${minDimension})`
     }
@@ -384,6 +391,8 @@ export default {
       'correct': correctAnimation,
       'incorrect': incorrectAnimation
     }
+
+    window.addEventListener("resize", this.resizeApp)
   }
 }
 </script>
