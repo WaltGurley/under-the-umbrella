@@ -115,7 +115,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$card-height: 85vh;
+$card-height: 0.85 * 1080px;
 $card-width: 5 / 8 * $card-height;
 $card-offset-x: -50%;
 $card-offset-y: -50%;
@@ -255,15 +255,15 @@ $card-offset-y: -50%;
 }
 
 .slide-right-enter {
-  transform: translateX(50vw) translateY($card-offset-y);
+  transform: translateX(calc(1920px / 2)) translateY($card-offset-y);
 }
 
 .slide-right-leave-to {
-  transform: translateX(100vw) translateY($card-offset-y) rotateY(180deg);
+  transform: translateX(1920px) translateY($card-offset-y) rotateY(180deg);
 }
 
 .slide-left-enter, .slide-left-leave-to {
-  transform: translateX(-50vw) translateY($card-offset-y) rotateY(180deg);
+  transform: translateX(calc(-1920px / 2)) translateY($card-offset-y) rotateY(180deg);
 }
 
 .slide-left-enter-active, .slide-left-leave-active, .slide-right-leave-active, .slide-right-enter-active {

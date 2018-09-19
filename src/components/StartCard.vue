@@ -77,7 +77,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$card-height: 85vh;
+$card-height: 0.85 * 1080px;
 $card-width: 5 / 8 * $card-height;
 $card-offset-x: -50%;
 $card-offset-y: -50%;
@@ -174,7 +174,7 @@ $card-offset-y: -50%;
 
   &.slide-in-out-from-bottom-left {
   transform-origin: left;
-    transform: rotateX(180deg) rotateZ(-90deg) translateX(7.5vh) translateY($card-offset-y);
+    transform: rotateX(180deg) rotateZ(-90deg) translateX(25%) translateY($card-offset-y);
   }
 }
 

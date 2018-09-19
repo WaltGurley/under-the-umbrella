@@ -17,5 +17,10 @@ module.exports = {
     svgRule
       .use('vue-svg-loader')
         .loader('vue-svg-loader');
-  }
+  },
+
+  // Set the github repo name for the root url
+  baseUrl: process.env.VUE_APP_GHPAGES || '/',
+  
+  outputDir: process.env.VUE_APP_GH_DIST || 'dist'
 }

@@ -1,5 +1,8 @@
 <template>
-  <div id="app" v-on:click="resetOnInactivity">
+  <div id="app" 
+    v-on:click="resetOnInactivity"
+    v-bind:style="{ transform: testScale }"
+  >
     <!-- <PandaIcon class="test-icon panda-icon" style="width:16%"/> -->
     <div class="card-container">
       <transition
@@ -103,7 +106,8 @@ export default {
       nextButtonIsVisible: false,
       nextButtonText: 'Start',
       animations: {},
-      zooming: {}
+      zooming: {},
+      testScale: 1
     }
   },
   methods: {
@@ -285,6 +289,13 @@ export default {
     this.getImageDataOnLoad()
     // Create the zooming instance with set options for later attachment to GameCard img and ReferenceImage img
     this.setupZooming()
+
+    const minDimension = Math.min(window.innerWidth / 1920,
+      window.innerHeight / 1080)
+    console.log(minDimension)
+    if (minDimension < 1) {
+      this.testScale = `translate(-50%, -50%) scale(${minDimension})`
+    }
   },
   mounted () {
     // Animations used to show the score panda shake its head 'yes' on a correct choice
@@ -383,7 +394,12 @@ export default {
   font-family: 'Heebo', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  height: 100%;
+  width: 1920px;
+  height: 1080px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   background-image: url('./assets/RedTile.png');
   background-position: center;
   color: #333537;
@@ -426,19 +442,19 @@ export default {
   }
 
   .card-container {
-    width: 100vw;
-    height: 100%;
+    width: 1920px;
+    height: 1080px;
     perspective: 10000px;
   }
 
-  $card-height: 85vh;
+  $card-height: 0.85 * 1080px;
   $card-width: 5 / 8 * $card-height;
-  $center-bw-card-0vw: calc((50vw - #{$card-width} / 2) / 2);
+  $center-bw-card-0: (1920px / 2 - $card-width / 2) / 2;
   
   .score-icon-holder {
     position: absolute;
-    top: 75vh;
-    left: $center-bw-card-0vw;
+    top: 0.75 * 1080px;
+    left: $center-bw-card-0;
     transform: translateX(-50%) translateY(-50%);
 
     display: flex;
@@ -464,12 +480,12 @@ export default {
   .next-card-button {
     position: absolute;
     z-index: -1;
-    top: 75vh;
-    right: $center-bw-card-0vw;
+    top: 75%;
+    right: $center-bw-card-0;
     transform: translateX(50%) translateY(-50%);
 
     cursor: pointer;
-    height: 7.5vh;
+    height: 7.5%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -501,7 +517,7 @@ export default {
   }
 
   .slide-enter, .slide-leave-to {
-    transform: translateX(calc(-1 * #{$center-bw-card-0vw} - 100% - 13px)) translateY(-50%);
+    transform: translateX(calc(-#{$center-bw-card-0} - 100% - 13px)) translateY(-50%);
   }
 
   .slide-fade {

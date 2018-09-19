@@ -39,7 +39,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$card-height: 85vh;
+$card-height: 0.85 * 1080px;
 $card-width: 5 / 8 * $card-height;
 $card-offset-x: -50%;
 $card-offset-y: -50%;
@@ -47,7 +47,7 @@ $card-offset-y: -50%;
   width: $card-width;
   height: auto;
   position: absolute;
-  top: (100vh - $card-height) / 2;
+  top: (1080px - $card-height) / 2;
   right: 2%;
   // transform: translateY(0);
 
@@ -102,7 +102,7 @@ $card-offset-y: -50%;
 }
 
 .slide-up-enter, .slide-up-leave-to {
-  transform: translateY(calc(-100% - (100vh - #{$card-height}))) rotateZ(90deg);
+  transform: translateY(calc(-100% - (1080px - #{$card-height}))) rotateZ(90deg);
 }
 
 .slide-up-leave-active, .slide-up-enter-active {
