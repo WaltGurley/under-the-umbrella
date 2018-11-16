@@ -21,6 +21,7 @@
       <StartCard
         v-on:readyStartGame="readyStartGame"
         v-bind:showStartCard="preGame"
+        v-bind:cardsPerRound="cardsPerRound"
       />
       <GameCard 
         v-for="image in imageData"
@@ -49,7 +50,7 @@
       >
         <div
           v-on:click="actionBasedOnGameState"
-          class="next-card-button"
+          class="next-card-button app-hud-button-and-text"
           v-show="nextButtonIsVisible"
           >
             <h2 class="app-hud-text button-text">{{ nextButtonText }}</h2>
@@ -58,6 +59,23 @@
             </svg>
         </div>
       </transition>
+      <transition
+        name="slide"
+        enter-class="slide-horizontal"
+        leave-to-class="slide-horizontal"
+      >
+      <div
+        v-on:click="restartGame"
+        v-show="startRound"
+        class="restart-game-button app-hud-button-and-text"
+      >
+        <svg viewBox="0 0 110 113">
+  <path fill="#221d20" d="M106 70a5 5 0 0 0-5 3 47 47 0 1 1-18-55l-9 6a4 4 0 0 0 2 8l26 4a4 4 0 0 0 4-4l4-25a4 4 0 0 0-6-4l-12 9a57 57 0 1 0 18 65 5 5 0 0 0-4-7z"/>
+</svg>
+        <h2 class="app-hud-text button-text">Restart Game</h2>
+      </div>
+      </transition>
+      <div class="zoom-bg"></div>
     </div>
   </div>
 </template>
@@ -97,7 +115,7 @@ export default {
       uniqueAnimalNames: [],
       cardsPerRound: 5,
       score: 0,
-      preGame: true,
+      preGame: false,
       startRound: false,
       endRound: false,
       currentCard: 0,
@@ -114,6 +132,7 @@ export default {
     // This function reads and parses the image data from the file 'imageData.csv' located in the 'src' folder and creates an 'img' element using the provided URL. It also creates an array of unique animal names.
     getImageDataOnLoad: function () {
       let animalNames = []
+      
       fullImgData.forEach(function (row) {
         row.identified = false
         row.src = require(`./assets/images/${row.imageName}`)
@@ -130,10 +149,28 @@ export default {
         })
       this.uniqueAnimalNames = this.referenceCardData.map(row => row.animalName)
     },
-    // This function sets the data for the 'cardsPerRound' to be used in one round of play.
+    // This function sets the data for the 'cardsPerRound' to be used in one round of play. The full image data is shuffled, then filtered by unique name to prevent duplication of an animal type in one round, and then filtered to ensure an already identified image is not shown
     setDataForRound: function () {
-      this.imageData = sampleSize(
-        filter(fullImgData, img => !img.identified),
+      // Get the number of images that have not been identified
+      const numNotIdentified = filter(fullImgData, img =>
+        !img.identified).length
+      // If the number of unidentified animals is less than the number of cards in a round, reset all of the images to a state of unidentified
+      if (numNotIdentified < this.cardsPerRound) {
+        fullImgData.forEach(d => d.identified = false)
+      }
+
+      // Create an array consisting of unique animals that have not yet been identified
+      const uniqueAnimalsNotIdentified = filter(
+        uniqBy(shuffle(fullImgData), 'animalName'),
+        img => !img.identified
+      )
+      // If the number of unique, unidentified animals is less than the number of cards in a round set the number of cards in a round to the number of unique, unidentified animals
+      if (uniqueAnimalsNotIdentified.length < this.cardsPerRound) {
+        this.cardsPerRound = uniqueAnimalsNotIdentified.length;
+      }
+
+      // Set the image data that will populate the cards in a round
+      this.imageData = sampleSize(uniqueAnimalsNotIdentified,
         this.cardsPerRound
       )
 
@@ -174,8 +211,8 @@ export default {
     getNextGameCard: function () {
       this.nextButtonIsVisible = false
       this.showReferenceImageWithID = ''
-      this.animations.correct.seek(0);
-      this.animations.incorrect.seek(0);
+      this.animations.correct.restart();
+      this.animations.incorrect.restart();
       this.animations.correct.pause();
       this.animations.incorrect.pause();
       if (this.currentCard === this.cardsPerRound) {
@@ -185,18 +222,29 @@ export default {
       }
       this.currentCard++
     },
+    // This function changes the text of the next button to reflect the action that will happen when it is clicked
+    changeNextButtonText: function () {
+      if (this.currentCard === 0) {
+        this.nextButtonText = this.preGame ? 'Start' : 'Play Again'
+        if (this.nextButtonText === 'Play Again') {
+          this.nextButtonIsVisible = true
+        }
+      } else if (this.currentCard === this.cardsPerRound) {
+        this.nextButtonText = 'Finish'
+      } else { this.nextButtonText = 'Next' }
+    },
     // This function keeps track of the score after the user submits an answer. It also shows the 'next button' to select a new card.
-    trackScore: function (correct, userChoice) {
-      this.imageData[this.currentCard - 1].identified = correct
+    trackScore: function (isCorrect, userChoice) {
+      this.imageData[this.currentCard - 1].identified = isCorrect
       this.score = this.imageData.filter(d => d.identified).length
       this.nextButtonIsVisible = true
 
       // If the user's choice is incorrect show the reference image
-      if (!correct) {
+      if (!isCorrect) {
         this.showReferenceImageWithID = userChoice
         // Start the panda animation for incorrect choices
         this.animations.incorrect.play()
-      } else if (correct) {
+      } else if (isCorrect) {
         // Start the panda animation for correct choice
         this.animations.correct.play()
 
@@ -214,9 +262,21 @@ export default {
     finishRound: function () {
       this.startRound = false
       this.endRound = true
-      // this.nextButtonText = "Play Again"
     },
-    // This function uses the state of the game booleans (preGame, endRound) to run other functions to setup the game, start a round, and get the next card
+    // This function restarts the game to the front of the start card and removes any other objects
+    restartGame: function () {
+      this.scoreIsVisible = false
+      this.nextButtonIsVisible = false
+      this.preGame = true
+      this.startRound = false
+      this.currentCard = 0
+      this.showReferenceImageWithID = ''
+      this.animations.correct.restart();
+      this.animations.incorrect.restart();
+      this.animations.correct.pause();
+      this.animations.incorrect.pause();
+    },
+    // This function is called when a user presses the "start/next/play again" button. It uses the state of the game booleans (preGame, endRound) to run other functions to setup the game, start a round, and get the next card
     actionBasedOnGameState: function () {
       if (this.preGame) {
         this.startRoundSetup()
@@ -228,25 +288,18 @@ export default {
     // This function reloads the page after two minutes of inactivity.
     resetOnInactivity: function () {
       clearTimeout(this.startInactiveResetTimer)
-      this.startInactiveResetTimer = setTimeout( () => window.location.reload(), 120000)
-    },
-    // This function changes the text of the next button to reflect the action that will happen when it is clicked
-    changeNextButtonText: function () {
-      if (this.currentCard === 0) {
-        this.nextButtonText = this.preGame ? 'Start' : 'Play Again'
-        this.nextButtonIsVisible = true
-      } else if (this.currentCard === this.cardsPerRound) {
-        this.nextButtonText = 'Finish'
-      } else { this.nextButtonText = 'Next' }
+      this.startInactiveResetTimer = setTimeout( () =>
+        this.restartGame, 120000)
     },
     // This function creates a listener to zoom in/out on touch using the Zooming package. It returns a zoom object to attach the listener to the to card images and reference images.
     setupZooming: function () {
       const zooming = new Zooming({
         bgOpacity: 0,
         enableGrab: false,
-        scaleBase: 0.9,
+        // scaleBase: 0.9,
         // Add border radius to bottom of card image when zoomed in, lower the z-index of the visible reference image, and set image zoom callout text and icon display to none
         onBeforeOpen: (zoomedImage) => {
+          document.querySelector(".zoom-bg").classList.add("show")
           document.querySelectorAll('.next-card-button').forEach(d =>
             d.setAttribute('disabled', true)
           )
@@ -262,6 +315,8 @@ export default {
             )
           }
         },
+        onBeforeClose: () => 
+          document.querySelector(".zoom-bg").classList.remove("show"),
         // Remove border radius from bottom of card image when zoomed out, raise the z-index of the visible reference image, and make image zoom callout text and icon visible
         onClose: (zoomedImage) => {
           document.querySelectorAll('.next-card-button').forEach(d =>
@@ -305,6 +360,9 @@ export default {
     }
   },
   mounted () {
+    // Wait to set pregame to true in order to animate start card entrance
+    this.preGame = true
+    
     // Animations used to show the score panda shake its head 'yes' on a correct choice
     const correctAnimation = anime.timeline({
       direction: 'alternate',
@@ -400,7 +458,7 @@ export default {
 <style lang="scss">
 @import './src/assets/css/fonts.scss';
 #app {
-  font-family: 'Heebo', Helvetica, Arial, sans-serif;
+  font-family: 'Gentium Basic', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   width: 1920px;
@@ -414,9 +472,14 @@ export default {
   color: #333537;
   background-color: #333537;
   overflow: hidden;
+  position: fixed;
 
   .bolded {
     font-weight: 700;
+  }
+
+  .no-pointer-event {
+    pointer-events: none;
   }
 
   .send-backwards {
@@ -432,8 +495,19 @@ export default {
     filter: drop-shadow(3px 6px 2px #24383A);
   }
 
+  .app-hud-button-and-text {
+    cursor: pointer;
+    height: 7.5vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   button {
     cursor: pointer;
+    font-family: 'Gentium Basic', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-size: 2.2em;
     font-weight: 400;
     color: #FFFFFF;
@@ -443,8 +517,8 @@ export default {
     transition: all 0.2s ease-in;
 
     &:hover, &:focus {
-      background-color: #DD5F5B;
-      border-color: #DD5F5B;
+      background-color: #ff3920;
+      border-color: #ff3920;
       outline: none !important;
       box-shadow: none;
     }
@@ -454,6 +528,25 @@ export default {
     width: 1920px;
     height: 1080px;
     perspective: 10000px;
+  }
+
+  .zoom-bg {
+    position: absolute;
+    width: 1920px;
+    height: 1080px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-color: #333537;
+    transition: opacity 0.4s;
+
+    &.show {
+      opacity: 0.8;
+    }
   }
 
   $card-height: 0.85 * 1080px;
@@ -486,18 +579,37 @@ export default {
     }
   }
 
+  .restart-game-button {
+    position: absolute;
+    z-index: -1;
+    left: 2%;
+    top: 7.5vh;
+
+    .button-text {
+      margin-left: 0.6rem;
+    }
+
+    svg {
+      // background-color: #333537;
+      // border-radius: 1.2rem;
+      // border-style: solid;
+      // border-width: 5px;
+      // border-color: #FFFFFF;
+      height: 80%;
+      filter: drop-shadow(3px 6px 2px #24383A);
+
+      path {
+        fill: #ffffff;
+      }
+    }
+  }
+
   .next-card-button {
     position: absolute;
     z-index: -1;
     top: 75%;
     right: $center-bw-card-0;
     transform: translateX(50%) translateY(-50%);
-
-    cursor: pointer;
-    height: 7.5%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
     .button-text {
       margin-right: 0.6rem;
@@ -515,34 +627,46 @@ export default {
     }
   }
 
+  // panda score icon and restart game button animation
   .slide {
     transition-property: transform;
     transition-timing-function: cubic-bezier(0.25, -0.5, 0.25, 1.25);
   }
 
+  // panda score icon animation
   .slide-enter-active, .slide-leave-active {
     transition-delay: 0.6s;
     transition-duration: 1.2s;
   }
 
+  // panda score icon animation
   .slide-enter, .slide-leave-to {
     transform: translateX(calc(-#{$center-bw-card-0} - 100% - 13px)) translateY(-50%);
   }
 
+  // restart game button animation
+  .slide-horizontal {
+    transform: translateX(calc(-101% - 2vw));
+  }
+
+  // start/next button animation
   .slide-fade {
     transition-property: opacity, transform;
     transition-timing-function: cubic-bezier(0.25, -0.5, 0.25, 1.25);
   }
 
+  // start/next button animation
   .slide-fade-enter-active {
     transition-delay: 1.2s;
     transition-duration: 1.2s;
   }
 
+  // start/next button animation
   .slide-fade-leave-active {
     transition-duration: 0.4s;
   }
 
+  // start/next button animation
   .slide-fade-enter, .slide-fade-leave-to {
     opacity: 0;
     transform: translateX(40%) translateY(-50%)

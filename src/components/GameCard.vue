@@ -18,7 +18,7 @@
           data-action="zoom"
         >
         <aside class="image-zoom-callout">
-          <p class="image-zoom-text">Touch to zoom</p>
+          <p class="image-zoom-text">Touch photo to zoom</p>
           <TouchIcon/>
         </aside>
         <div class="card-choices">
@@ -43,7 +43,7 @@
           data-action="zoom"
         >
         <aside class="image-zoom-callout">
-          <p class="image-zoom-text">Touch to zoom</p>
+          <p class="image-zoom-text">Touch photo to zoom</p>
           <TouchIcon/>
         </aside>
         <div v-show="correct">
@@ -126,6 +126,7 @@ $card-offset-y: -50%;
   top: 50%;
   left: 50%;
   transform: translateX($card-offset-x) translateY($card-offset-y);
+  z-index: 2;
 
   border-style: solid;
   border-width: 8px;
@@ -141,7 +142,7 @@ $card-offset-y: -50%;
     flex-direction: column;
     align-items: center;
     backface-visibility: hidden;
-    box-shadow: 0px 0px 0px 8px #DD5F5B inset;
+    box-shadow: 0px 0px 0px 8px #ff3920 inset;
 
     .image-zoom-callout {
       position: absolute;
@@ -169,6 +170,7 @@ $card-offset-y: -50%;
       width: calc(100% - 16px);
       margin-top: 8px;
       position: relative;
+      transition: box-shadow 1s ease-in-out;
 
       &.full-border-radius {
         border-bottom-right-radius:  1.1rem;
@@ -184,7 +186,7 @@ $card-offset-y: -50%;
     }
 
     .card-header {
-      font-size: 2.2rem;
+      font-size: 2.4rem;
       font-weight: 700;
       text-align: center;
       margin-bottom: 0;
@@ -204,13 +206,13 @@ $card-offset-y: -50%;
     }
 
     .card-paragraph {
-      font-size: 1.4rem;
-      padding-left: 3rem;
-      padding-right: 3rem;
-      margin-top: 0.4em;
+      font-size: 1.8rem;
+      padding-left: 1.4rem;
+      padding-right: 1.4rem;
+      margin-top: 0.8em;
 
       &.big-font {
-        font-size: 1.7rem;
+        font-size: 2.0rem;
       }
     }
 
