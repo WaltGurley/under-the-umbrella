@@ -50,7 +50,7 @@
           <h2 class="card-header">You are correct!</h2>
           <h2 class="card-header">{{ cardData.animalName }}</h2>
           <h2 class="card-subheader sci-name">{{ cardData.scientificName }}</h2>
-          <p class="card-paragraph">{{ cardData.animalDescription }}</p>
+          <p class="card-paragraph" v-html="cardData.animalDescription"></p>
         </div>
         <div v-show="!correct">
           <h2 class="card-header">Sorry, that's incorrect</h2>
@@ -115,7 +115,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$card-height: 0.85 * 1080px;
+$card-height: 85vh;
 $card-width: 5 / 8 * $card-height;
 $card-offset-x: -50%;
 $card-offset-y: -50%;
@@ -257,15 +257,15 @@ $card-offset-y: -50%;
 }
 
 .slide-right-enter {
-  transform: translateX(calc(1920px / 2)) translateY($card-offset-y);
+  transform: translateX(50vw) translateY($card-offset-y);
 }
 
 .slide-right-leave-to {
-  transform: translateX(1920px) translateY($card-offset-y) rotateY(180deg);
+  transform: translateX(100vw) translateY($card-offset-y) rotateY(180deg);
 }
 
 .slide-left-enter, .slide-left-leave-to {
-  transform: translateX(calc(-1920px / 2)) translateY($card-offset-y) rotateY(180deg);
+  transform: translateX(-50vw) translateY($card-offset-y) rotateY(180deg);
 }
 
 .slide-left-enter-active, .slide-left-leave-active, .slide-right-leave-active, .slide-right-enter-active {
