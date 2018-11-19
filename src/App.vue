@@ -342,8 +342,6 @@ export default {
       const minDimension = Math.min(window.innerWidth / 1920,
         window.innerHeight / 1080)
         this.testScale = `translate(-50%, -50%) scale(${minDimension})`
-
-    console.log(this.testScale)
     }
   },
   beforeMount () {
