@@ -16,3 +16,5 @@ git commit -m 'deploy'
 git push -f git@github.com:WaltGurley/testing.git master:gh-pages
 
 cd -
+
+echo "Test locally in dist-ghpages folder using: live-server --mount='/testing:./'"
