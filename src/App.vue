@@ -341,9 +341,8 @@ export default {
     resizeApp: function() {
       const minDimension = Math.min(window.innerWidth / 1920,
         window.innerHeight / 1080)
-      if (minDimension < 1) {
         this.testScale = `translate(-50%, -50%) scale(${minDimension})`
-      }
+
     console.log(this.testScale)
     }
   },
@@ -353,11 +352,7 @@ export default {
     // Create the zooming instance with set options for later attachment to GameCard img and ReferenceImage img
     this.setupZooming()
 
-    const minDimension = Math.min(window.innerWidth / 1920,
-      window.innerHeight / 1080)
-    if (minDimension < 1) {
-      this.testScale = `translate(-50%, -50%) scale(${minDimension})`
-    }
+    this.resizeApp()
   },
   mounted () {
     // Wait to set pregame to true in order to animate start card entrance
