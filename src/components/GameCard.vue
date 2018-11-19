@@ -121,7 +121,7 @@ $card-offset-x: -50%;
 $card-offset-y: -50%;
 .card {
   width: $card-width;
-  height: 8/5 * $card-width;
+  height: $card-height;
   position: absolute;
   top: 50%;
   left: 50%;
